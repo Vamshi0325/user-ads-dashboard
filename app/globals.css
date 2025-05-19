@@ -1,0 +1,464 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 0 0% 100%;
+    --foreground: 240 10% 3.9%;
+    --card: 0 0% 100%;
+    --card-foreground: 240 10% 3.9%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 240 10% 3.9%;
+    --primary: 270 50% 40%;
+    --primary-foreground: 0 0% 98%;
+    --secondary: 240 4.8% 95.9%;
+    --secondary-foreground: 240 5.9% 10%;
+    --muted: 240 4.8% 95.9%;
+    --muted-foreground: 240 3.8% 46.1%;
+    --accent: 240 4.8% 95.9%;
+    --accent-foreground: 240 5.9% 10%;
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 0 0% 98%;
+    --border: 240 5.9% 90%;
+    --input: 240 5.9% 90%;
+    --ring: 270 50% 40%;
+    --radius: 0.5rem;
+
+    /* Sidebar specific variables */
+    --sidebar-background: 270 50% 15%;
+    --sidebar-foreground: 240 10% 95%;
+    --sidebar-primary: 270 50% 40%;
+    --sidebar-primary-foreground: 0 0% 98%;
+    --sidebar-accent: 270 50% 25%;
+    --sidebar-accent-foreground: 240 10% 95%;
+    --sidebar-border: 270 30% 30%;
+    --sidebar-ring: 270 50% 40%;
+  }
+
+  .dark {
+    --background: 270 50% 10%;
+    --foreground: 0 0% 98%;
+    --card: 270 50% 15%;
+    --card-foreground: 0 0% 98%;
+    --popover: 240 10% 3.9%;
+    --popover-foreground: 0 0% 98%;
+    --primary: 270 50% 40%;
+    --primary-foreground: 0 0% 98%;
+    --secondary: 240 3.7% 15.9%;
+    --secondary-foreground: 0 0% 98%;
+    --muted: 240 3.7% 15.9%;
+    --muted-foreground: 240 5% 64.9%;
+    --accent: 240 3.7% 15.9%;
+    --accent-foreground: 0 0% 98%;
+    --destructive: 0 62.8% 30.6%;
+    --destructive-foreground: 0 0% 98%;
+    --border: 240 3.7% 15.9%;
+    --input: 240 3.7% 15.9%;
+    --ring: 270 50% 40%;
+
+    /* Sidebar specific variables */
+    --sidebar-background: 270 50% 15%;
+    --sidebar-foreground: 240 10% 95%;
+    --sidebar-primary: 270 50% 40%;
+    --sidebar-primary-foreground: 0 0% 98%;
+    --sidebar-accent: 270 50% 25%;
+    --sidebar-accent-foreground: 240 10% 95%;
+    --sidebar-border: 270 30% 30%;
+    --sidebar-ring: 270 50% 40%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground;
+  }
+}
+
+/* Add custom card styles */
+@layer components {
+  .dashboard-card {
+    @apply bg-gradient-to-br from-purple-900/90 to-purple-950 border-purple-800/40 backdrop-blur-sm 
+           shadow-lg shadow-purple-950/40 transition-all duration-300 hover:shadow-xl hover:shadow-purple-900/30 
+         hover:border-purple-700/50 hover:-translate-y-0.5;
+  }
+
+  .stat-card {
+    @apply dashboard-card relative overflow-hidden;
+  }
+
+  .stat-card::before {
+    content: "";
+    @apply absolute top-0 right-0 w-24 h-24 bg-gradient-to-bl from-purple-600/10 to-transparent rounded-bl-full;
+  }
+}
+
+/* Add these custom scrollbar styles to hide scrollbars while maintaining functionality */
+@layer utilities {
+  .scrollbar-hide {
+    -ms-overflow-style: none; /* IE and Edge */
+    scrollbar-width: none; /* Firefox */
+  }
+
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none; /* Chrome, Safari and Opera */
+  }
+
+  /* For when you want a minimal scrollbar */
+  .scrollbar-thin {
+    scrollbar-width: thin;
+  }
+
+  .scrollbar-thin::-webkit-scrollbar {
+    width: 4px;
+    height: 4px;
+  }
+
+  .scrollbar-thin::-webkit-scrollbar-track {
+    background: rgba(128, 90, 213, 0.05);
+    border-radius: 9999px;
+  }
+
+  .scrollbar-thin::-webkit-scrollbar-thumb {
+    background-color: rgba(128, 90, 213, 0.3);
+    border-radius: 9999px;
+  }
+
+  .scrollbar-thin::-webkit-scrollbar-thumb:hover {
+    background-color: rgba(128, 90, 213, 0.5);
+  }
+
+  /* Add custom breakpoint for extra small screens */
+  @media (min-width: 480px) {
+    .xs\:block {
+      display: block;
+    }
+
+    .xs\:inline {
+      display: inline;
+    }
+
+    .xs\:hidden {
+      display: none;
+    }
+
+    .xs\:flex {
+      display: flex;
+    }
+  }
+
+  /* Add these responsive utility classes */
+  /* Responsive text sizes */
+  .text-responsive-xs {
+    @apply text-xs sm:text-sm;
+  }
+
+  .text-responsive-sm {
+    @apply text-sm sm:text-base;
+  }
+
+  .text-responsive-base {
+    @apply text-base sm:text-lg;
+  }
+
+  .text-responsive-lg {
+    @apply text-lg sm:text-xl md:text-2xl;
+  }
+
+  .text-responsive-xl {
+    @apply text-xl sm:text-2xl md:text-3xl;
+  }
+
+  /* Responsive padding */
+  .p-responsive {
+    @apply p-3 sm:p-4 md:p-6;
+  }
+
+  .px-responsive {
+    @apply px-3 sm:px-4 md:px-6;
+  }
+
+  .py-responsive {
+    @apply py-3 sm:py-4 md:py-6;
+  }
+
+  /* Responsive gap */
+  .gap-responsive {
+    @apply gap-2 sm:gap-3 md:gap-4;
+  }
+
+  /* Responsive grid columns */
+  .grid-cols-responsive {
+    @apply grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4;
+  }
+
+  /* Responsive flex direction */
+  .flex-responsive {
+    @apply flex flex-col sm:flex-row;
+  }
+
+  /* Responsive width */
+  .w-responsive {
+    @apply w-full sm:w-auto;
+  }
+
+  /* Responsive margin */
+  .m-responsive {
+    @apply m-2 sm:m-3 md:m-4;
+  }
+
+  .mx-responsive {
+    @apply mx-2 sm:mx-3 md:mx-4;
+  }
+
+  .my-responsive {
+    @apply my-2 sm:my-3 md:my-4;
+  }
+
+  /* Responsive table */
+  .table-responsive-container {
+    @apply w-full overflow-x-auto scrollbar-hide rounded-md border border-purple-800/40;
+  }
+
+  .table-responsive {
+    @apply min-w-full table-fixed md:table-auto;
+  }
+
+  /* Card responsive padding */
+  .card-padding-responsive {
+    @apply p-3 sm:p-4 md:p-6;
+  }
+}
+
+/* Update the scrollbar styles to completely remove them */
+/* Remove all scrollbars */
+* {
+  scrollbar-width: none !important; /* Firefox */
+  -ms-overflow-style: none !important; /* IE and Edge */
+}
+
+*::-webkit-scrollbar {
+  display: none !important; /* Chrome, Safari and Opera */
+  width: 0 !important;
+  height: 0 !important;
+}
+
+/* Ensure these styles take precedence over any other scrollbar styles */
+.scrollbar-thin {
+  scrollbar-width: none !important;
+}
+
+.scrollbar-thin::-webkit-scrollbar {
+  width: 0 !important;
+  height: 0 !important;
+  display: none !important;
+}
+
+.scrollbar-thin::-webkit-scrollbar-track {
+  display: none !important;
+}
+
+.scrollbar-thin::-webkit-scrollbar-thumb {
+  display: none !important;
+}
+
+/* Animation classes */
+.animate-fade-in {
+  animation: fadeIn 0.5s ease-in-out;
+}
+
+.animate-slide-up {
+  animation: slideUp 0.3s ease-out;
+}
+
+.animate-pulse-once {
+  animation: pulseOnce 1.5s ease-in-out;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes slideUp {
+  from {
+    transform: translateY(10px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+@keyframes pulseOnce {
+  0% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.05);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+/* Enhanced table styling */
+table {
+  @apply rounded-md overflow-hidden;
+}
+
+thead {
+  @apply bg-gradient-to-r from-purple-900/80 to-purple-950/90;
+}
+
+tbody tr {
+  @apply transition-colors duration-200;
+}
+
+tbody tr:hover {
+  @apply bg-purple-800/20;
+}
+
+/* Card hover effects */
+.card-hover-effect {
+  @apply transition-all duration-300 hover:shadow-xl hover:shadow-purple-900/30 hover:-translate-y-0.5;
+}
+
+/* Button animations */
+button {
+  @apply transition-all duration-200;
+}
+
+/* Input focus animations */
+input:focus,
+select:focus {
+  @apply transition-all duration-200;
+}
+
+/* Improve mobile table display */
+@media (max-width: 640px) {
+  .mobile-table-card {
+    @apply divide-y divide-purple-800/30;
+  }
+
+  .mobile-table-row {
+    @apply p-4 hover:bg-purple-800/10;
+  }
+
+  .mobile-table-header {
+    @apply font-medium text-purple-100 mb-2;
+  }
+
+  .mobile-table-content {
+    @apply text-xs text-purple-400 space-y-1 mb-3;
+  }
+
+  .mobile-table-actions {
+    @apply flex gap-2;
+  }
+}
+
+/* Improve button responsiveness */
+.btn-responsive {
+  @apply w-full sm:w-auto;
+}
+
+/* Improve form responsiveness */
+.form-responsive {
+  @apply space-y-4 sm:space-y-6;
+}
+
+/* Improve card responsiveness */
+.card-responsive {
+  @apply p-3 sm:p-4 md:p-6;
+}
+
+/* Fix for container heights */
+html,
+body {
+  height: 100%;
+  overflow: hidden;
+}
+
+#__next,
+.app-container {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Ensure content areas only take up the space they need */
+.content-auto {
+  height: auto !important;
+  min-height: 0 !important;
+}
+
+/* Fix scrolling issues */
+html,
+body {
+  height: 100%;
+  overflow: hidden;
+}
+
+/* Ensure main content areas are scrollable */
+.overflow-y-auto {
+  overflow-y: auto !important;
+}
+
+/* Ensure content containers don't force unnecessary height */
+.h-auto {
+  height: auto !important;
+}
+
+/* Ensure flex containers expand properly */
+.flex-1 {
+  flex: 1 1 auto;
+}
+
+/* Fix for SidebarInset to ensure proper scrolling */
+[data-sidebar="sidebar-inset"] {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  overflow: hidden;
+}
+
+/* Ensure main content area scrolls properly */
+main.flex-1 {
+  overflow-y: auto;
+  min-height: 0;
+}
+
+/* Add these styles for the mobile sidebar overlay */
+.sidebar-overlay {
+  position: fixed;
+  inset: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  z-index: 40;
+  transition: opacity 0.3s ease;
+}
+
+/* Prevent body scrolling when mobile sidebar is open */
+body.sidebar-open {
+  overflow: hidden;
+}
+
+/* Ensure content doesn't shift when scrollbar appears/disappears */
+html {
+  scrollbar-gutter: stable;
+}
+
+/* Improve mobile sidebar appearance */
+@media (max-width: 768px) {
+  [data-state="open"] {
+    box-shadow: 0 0 25px rgba(0, 0, 0, 0.3);
+  }
+}
