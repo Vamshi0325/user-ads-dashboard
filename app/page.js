@@ -2,19 +2,11 @@
 
 import { Dashboard } from "@/components/dashboard"
 import { AuthProvider, useAuth } from "@/context/auth-context"
-import { useEffect } from "react"
 import { Loader2 } from "lucide-react"
 
 // Auth wrapper component
 function AuthWrapper() {
   const { isAuthenticated, isLoading, showLoginModal } = useAuth()
-
-  // Show login modal if not authenticated
-  useEffect(() => {
-    if (!isLoading && !isAuthenticated) {
-      showLoginModal()
-    }
-  }, [isLoading, isAuthenticated, showLoginModal])
 
   // Loading state
   if (isLoading) {

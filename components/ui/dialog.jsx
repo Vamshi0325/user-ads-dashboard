@@ -32,7 +32,7 @@ const DialogOverlay = React.forwardRef(({ className, ...props }, ref) => (
 ))
 DialogOverlay.displayName = DialogPrimitive.Overlay.displayName
 
-const DialogContent = React.forwardRef(({ className, children, ...props }, ref) => {
+const DialogContent = React.forwardRef(({ className, children, onPointerDownOutside, ...props }, ref) => {
   // Check if DialogTitle is included in children
   const hasDialogTitle = React.Children.toArray(children).some(
     (child) =>
@@ -55,6 +55,7 @@ const DialogContent = React.forwardRef(({ className, children, ...props }, ref) 
           "w-[90%] rounded-xl sm:w-full",
           className,
         )}
+        onPointerDownOutside={onPointerDownOutside}
         {...props}
       >
         {!hasDialogTitle && (

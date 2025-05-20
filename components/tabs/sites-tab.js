@@ -31,7 +31,6 @@ export function SitesTab() {
     {
       title: "stringgames.io",
       id: "2634625",
-      zones: 4,
       status: "Verified",
       created: "23.09.2024",
       createdDate: new Date(2024, 8, 23), // September 23, 2024
@@ -39,16 +38,13 @@ export function SitesTab() {
     {
       title: "stringspinwinbot",
       id: "2727221",
-      zones: 4,
       status: "Verified",
       created: "11.12.2024",
       createdDate: new Date(2024, 11, 11), // December 11, 2024
     },
-    // Adding more sample data for better filter testing
     {
       title: "testsite.dev",
       id: "1234567",
-      zones: 2,
       status: "Pending",
       created: "05.10.2024",
       createdDate: new Date(2024, 9, 5), // October 5, 2024
@@ -56,7 +52,6 @@ export function SitesTab() {
     {
       title: "demo-project",
       id: "7654321",
-      zones: 1,
       status: "Inactive",
       created: "18.11.2024",
       createdDate: new Date(2024, 10, 18), // November 18, 2024
@@ -70,7 +65,6 @@ export function SitesTab() {
   const [showFilters, setShowFilters] = useState(false)
   const [sites, setSites] = useState(sitesData)
   const [isMobile, setIsMobile] = useState(false)
-  const [zoneFilter, setZoneFilter] = useState("all")
 
   // Site detail view state
   const [selectedSite, setSelectedSite] = useState(null)
@@ -100,24 +94,19 @@ export function SitesTab() {
   const handleSearchChange = (e) => {
     const newQuery = e.target.value
     setSearchQuery(newQuery)
-    applyFilters(newQuery, dateFilter, statusFilter, zoneFilter)
+    applyFilters(newQuery, dateFilter, statusFilter)
   }
 
   // Handle date filter change
   const handleDateChange = (date) => {
     setDateFilter(date)
-    applyFilters(searchQuery, date, statusFilter, zoneFilter)
+    applyFilters(searchQuery, date, statusFilter)
   }
 
   // Handle status filter change
   const handleStatusChange = (value) => {
     setStatusFilter(value)
-    applyFilters(searchQuery, dateFilter, value, zoneFilter)
-  }
-
-  const handleZoneChange = (value) => {
-    setZoneFilter(value)
-    applyFilters(searchQuery, dateFilter, statusFilter, value)
+    applyFilters(searchQuery, dateFilter, value)
   }
 
   // Clear all filters
@@ -125,19 +114,17 @@ export function SitesTab() {
     setSearchQuery("")
     setDateFilter(null)
     setStatusFilter("all")
-    setZoneFilter("all")
     setSites(sitesData)
   }
 
   // Apply all filters
-  const applyFilters = (query, date, status, zone) => {
+  const applyFilters = (query, date, status) => {
     let filteredSites = [...sitesData]
 
-    // Apply search query filter
+    // Apply search query filter (App Name only)
     if (query) {
       filteredSites = filteredSites.filter((site) => {
-        // Search in both title and ID
-        return site.title.toLowerCase().includes(query.toLowerCase()) || site.id.includes(query)
+        return site.title.toLowerCase().includes(query.toLowerCase())
       })
     }
 
@@ -160,14 +147,6 @@ export function SitesTab() {
       })
     }
 
-    // Apply zone filter
-    if (zone && zone !== "all") {
-      const zoneCount = Number.parseInt(zone)
-      filteredSites = filteredSites.filter((site) => {
-        return site.zones === zoneCount
-      })
-    }
-
     setSites(filteredSites)
   }
 
@@ -182,7 +161,7 @@ export function SitesTab() {
   }
 
   // Check if any filters are active
-  const hasActiveFilters = searchQuery || dateFilter || statusFilter !== "all" || zoneFilter !== "all"
+  const hasActiveFilters = searchQuery || dateFilter || statusFilter !== "all"
 
   // If a site is selected, show the site detail view
   if (selectedSite) {
@@ -208,7 +187,7 @@ export function SitesTab() {
             <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-purple-400" />
             <Input
               type="search"
-              placeholder="Search by title or ID"
+              placeholder="Search by App Name"
               value={searchQuery}
               onChange={handleSearchChange}
               className="w-full bg-purple-900/40 border-purple-700/30 pl-8 text-purple-100 placeholder:text-purple-400 focus-visible:ring-purple-500"
@@ -236,10 +215,10 @@ export function SitesTab() {
           )}
         </div>
 
-        {/* Advanced filters */}
+        {/* Simplified filters */}
         {showFilters && (
           <div className="p-4 rounded-md bg-purple-900/40 border border-purple-700/30 space-y-4">
-            <h3 className="text-sm font-medium text-purple-200">Advanced Filters</h3>
+            <h3 className="text-sm font-medium text-purple-200">Filters</h3>
 
             <div className="flex flex-col sm:flex-row gap-4">
               <div className="space-y-2 flex-1">
@@ -302,27 +281,6 @@ export function SitesTab() {
                   </SelectContent>
                 </Select>
               </div>
-              <div className="space-y-2 flex-1">
-                <Label htmlFor="zone-filter" className="text-purple-200">
-                  Filter by Zones
-                </Label>
-                <Select value={zoneFilter} onValueChange={handleZoneChange}>
-                  <SelectTrigger
-                    id="zone-filter"
-                    className={`w-full border-purple-700/30 ${zoneFilter !== "all" ? "bg-purple-700/30 text-white" : "bg-purple-900/40 text-purple-100"} focus-visible:ring-purple-500`}
-                  >
-                    <SelectValue placeholder="All Zones" />
-                  </SelectTrigger>
-                  <SelectContent className="bg-purple-900 border-purple-700/50 text-purple-100">
-                    <SelectItem value="all">All Zones</SelectItem>
-                    <SelectItem value="1">1 Zone</SelectItem>
-                    <SelectItem value="2">2 Zones</SelectItem>
-                    <SelectItem value="3">3 Zones</SelectItem>
-                    <SelectItem value="4">4 Zones</SelectItem>
-                    <SelectItem value="5">5+ Zones</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
             </div>
 
             {/* Filter summary */}
@@ -330,10 +288,9 @@ export function SitesTab() {
               <div className="mt-4 p-3 rounded-md bg-purple-800/20 text-sm text-purple-200">
                 <p className="font-medium mb-1">Active Filters:</p>
                 <ul className="space-y-1 text-purple-300">
-                  {searchQuery && <li>• Search: "{searchQuery}" in titles and IDs</li>}
+                  {searchQuery && <li>• App Name: "{searchQuery}"</li>}
                   {dateFilter && <li>• Date: {format(dateFilter, "PPP")}</li>}
                   {statusFilter !== "all" && <li>• Status: {statusFilter}</li>}
-                  {zoneFilter !== "all" && <li>• Zones: {zoneFilter === "5" ? "5+" : zoneFilter}</li>}
                 </ul>
               </div>
             )}
@@ -344,143 +301,115 @@ export function SitesTab() {
       {/* Sites table - Mobile responsive */}
       <Card className="dashboard-card">
         <CardContent className="p-0">
-          {isMobile ? (
-            // Mobile view - card-based layout
-            <div className="divide-y divide-purple-800/30">
-              {sites.length > 0 ? (
-                sites.map((site) => (
-                  <div key={site.id} className="p-3 sm:p-4 hover:bg-purple-800/10">
-                    <div className="flex justify-between items-start mb-2">
-                      <h3 className="font-medium text-purple-100 text-sm sm:text-base break-all pr-2">{site.title}</h3>
-                      <span
-                        className={`inline-flex items-center rounded-full px-1.5 py-0.5 text-xs ${
-                          site.status === "Verified"
-                            ? "bg-green-500/20 text-green-400"
-                            : site.status === "Pending"
-                              ? "bg-yellow-500/20 text-yellow-400"
-                              : "bg-red-500/20 text-red-400"
-                        }`}
-                      >
-                        {site.status}
-                      </span>
+          <div className="md:hidden">
+            {sites.length > 0 ? (
+              sites.map((site) => (
+                <div key={site.id} className="p-3 sm:p-4 hover:bg-purple-800/10">
+                  <div className="flex justify-between items-start mb-2">
+                    <h3 className="font-medium text-purple-100 text-sm sm:text-base break-all pr-2">{site.title}</h3>
+                    <span
+                      className={`inline-flex items-center rounded-full px-1.5 py-0.5 text-xs ${
+                        site.status === "Verified"
+                          ? "bg-green-500/20 text-green-400"
+                          : site.status === "Pending"
+                            ? "bg-yellow-500/20 text-yellow-400"
+                            : "bg-red-500/20 text-red-400"
+                      }`}
+                    >
+                      {site.status}
+                    </span>
+                  </div>
+                  <div className="text-xs text-purple-400 space-y-1 mb-3">
+                    <div className="flex justify-between">
+                      <span>Web App Link:</span>
+                      <span className="text-purple-100">t.me/{site.title.toLowerCase()}</span>
                     </div>
-                    <div className="text-xs text-purple-400 space-y-1 mb-3">
-                      <div>ID: {site.id}</div>
-                      <div>Created: {site.created}</div>
-                      <div>Zones: {site.zones}</div>
+                    <div className="flex justify-between">
+                      <span>Web App URL:</span>
+                      <span className="text-purple-100">{site.title.toLowerCase()}.io</span>
                     </div>
-                    <div className="flex flex-wrap gap-2">
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        className="h-8 border-purple-700/50 bg-purple-800/20 text-purple-300 hover:text-white hover:bg-purple-700/50 text-xs sm:text-sm flex-1 min-w-[80px]"
-                        onClick={() => handleOpenSite(site)}
-                      >
-                        <ChevronRight className="mr-1 h-3 w-3 sm:h-4 sm:w-4 flex-shrink-0" />{" "}
-                        <span className="whitespace-nowrap">Open site</span>
-                      </Button>
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        className="h-8 border-purple-700/50 bg-purple-800/20 text-purple-300 hover:text-white hover:bg-purple-700/50 text-xs sm:text-sm flex-1 min-w-[80px]"
-                      >
-                        <BarChart2 className="mr-1 h-3 w-3 sm:h-4 sm:w-4 flex-shrink-0" /> <span>Stats</span>
-                      </Button>
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        className="h-8 border-purple-700/50 bg-purple-800/20 text-purple-300 hover:text-white hover:bg-purple-700/50 text-xs sm:text-sm flex-1 min-w-[80px]"
-                      >
-                        <Plus className="mr-1 h-3 w-3 sm:h-4 sm:w-4 flex-shrink-0" /> Add Zone
-                      </Button>
+                    <div className="flex justify-between">
+                      <span>Created At:</span>
+                      <span className="text-purple-100">{site.created}</span>
                     </div>
                   </div>
-                ))
-              ) : (
-                <div className="p-6 sm:p-8 text-center text-purple-300 text-sm sm:text-base">
-                  No sites match your filters. Try adjusting your search criteria.
+                  <div className="flex justify-center">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="h-8 border-purple-700/50 bg-purple-800/20 text-purple-300 hover:text-white hover:bg-purple-700/50 text-xs sm:text-sm"
+                    >
+                      <BarChart2 className="mr-1 h-3 w-3 sm:h-4 sm:w-4 flex-shrink-0" /> <span>Stats</span>
+                    </Button>
+                  </div>
                 </div>
-              )}
-            </div>
-          ) : (
-            // Desktop view - table layout with improved responsiveness
-            <div className="w-full overflow-x-auto scrollbar-hide">
-              <Table className="min-w-[700px]">
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Title</TableHead>
-                    <TableHead>ID</TableHead>
-                    <TableHead>
-                      Status <ChevronRight className="inline h-4 w-4 ml-1" />
-                    </TableHead>
-                    <TableHead>Zones</TableHead>
-                    <TableHead>Created</TableHead>
-                    <TableHead>Actions</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {sites.length > 0 ? (
-                    sites.map((site) => (
-                      <TableRow key={site.id}>
-                        <TableCell className="max-w-[150px] overflow-hidden text-ellipsis">{site.title}</TableCell>
-                        <TableCell>{site.id}</TableCell>
-                        <TableCell>
-                          <span
-                            className={`inline-flex items-center rounded-full px-2 py-1 text-xs ${
-                              site.status === "Verified"
-                                ? "bg-green-500/20 text-green-400"
-                                : site.status === "Pending"
-                                  ? "bg-yellow-500/20 text-yellow-400"
-                                  : "bg-red-500/20 text-red-400"
-                            }`}
+              ))
+            ) : (
+              <div className="p-6 sm:p-8 text-center text-purple-300 text-sm sm:text-base">
+                No sites match your filters. Try adjusting your search criteria.
+              </div>
+            )}
+          </div>
+
+          <div className="hidden md:block">
+            <Table className="min-w-[700px]">
+              <TableHeader>
+                <TableRow>
+                  <TableHead className="text-center">App Name</TableHead>
+                  <TableHead className="text-center">Web App Link</TableHead>
+                  <TableHead className="text-center">Web App URL</TableHead>
+                  <TableHead className="text-center">Status</TableHead>
+                  <TableHead className="text-center">Created At</TableHead>
+                  <TableHead className="text-center">Actions</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {sites.length > 0 ? (
+                  sites.map((site) => (
+                    <TableRow key={site.id}>
+                      <TableCell className="max-w-[150px] overflow-hidden text-ellipsis text-center">
+                        {site.title}
+                      </TableCell>
+                      <TableCell className="text-center">t.me/{site.title.toLowerCase()}</TableCell>
+                      <TableCell className="text-center">{site.title.toLowerCase()}.io</TableCell>
+                      <TableCell className="text-center">
+                        <span
+                          className={`inline-flex items-center rounded-full px-2 py-1 text-xs ${
+                            site.status === "Verified"
+                              ? "bg-green-500/20 text-green-400"
+                              : site.status === "Pending"
+                                ? "bg-yellow-500/20 text-yellow-400"
+                                : "bg-red-500/20 text-red-400"
+                          }`}
+                        >
+                          {site.status}
+                        </span>
+                      </TableCell>
+                      <TableCell className="text-center">{site.created}</TableCell>
+                      <TableCell className="text-center">
+                        <div className="flex items-center justify-center">
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            className="h-8 border-purple-700/50 bg-purple-800/20 text-purple-300 hover:text-white hover:bg-purple-700/50"
                           >
-                            {site.status}
-                          </span>
-                        </TableCell>
-                        <TableCell>{site.zones}</TableCell>
-                        <TableCell>{site.created}</TableCell>
-                        <TableCell>
-                          <div className="flex items-center justify-center gap-2">
-                            <Button
-                              variant="outline"
-                              size="sm"
-                              className="h-8 border-purple-700/50 bg-purple-800/20 text-purple-300 hover:text-white hover:bg-purple-700/50 flex-1 whitespace-nowrap"
-                              onClick={() => handleOpenSite(site)}
-                            >
-                              <ChevronRight className="mr-1 h-4 w-4" />
-                              <span className="whitespace-nowrap">Open site</span>
-                            </Button>
-                            <Button
-                              variant="outline"
-                              size="sm"
-                              className="h-8 border-purple-700/50 bg-purple-800/20 text-purple-300 hover:text-white hover:bg-purple-700/50 flex-1"
-                            >
-                              <BarChart2 className="mr-1 h-4 w-4" />
-                              Stats
-                            </Button>
-                            <Button
-                              variant="outline"
-                              size="sm"
-                              className="h-8 border-purple-700/50 bg-purple-800/20 text-purple-300 hover:text-white hover:bg-purple-700/50 flex-1"
-                            >
-                              <Plus className="mr-1 h-4 w-4" />
-                              Add Zone
-                            </Button>
-                          </div>
-                        </TableCell>
-                      </TableRow>
-                    ))
-                  ) : (
-                    <TableRow>
-                      <TableCell colSpan={6} className="h-24 text-center text-purple-300">
-                        No sites match your filters. Try adjusting your search criteria.
+                            <BarChart2 className="mr-1 h-4 w-4" />
+                            Stats
+                          </Button>
+                        </div>
                       </TableCell>
                     </TableRow>
-                  )}
-                </TableBody>
-              </Table>
-            </div>
-          )}
+                  ))
+                ) : (
+                  <TableRow>
+                    <TableCell colSpan={6} className="h-24 text-center text-purple-300">
+                      No sites match your filters. Try adjusting your search criteria.
+                    </TableCell>
+                  </TableRow>
+                )}
+              </TableBody>
+            </Table>
+          </div>
           <div className="flex flex-col sm:flex-row items-center justify-between p-4 border-t border-purple-800/30">
             <div className="flex items-center mb-4 sm:mb-0">
               <span className="text-sm text-purple-300 mr-2">Show rows</span>

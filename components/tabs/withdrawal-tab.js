@@ -4,7 +4,7 @@ import { useState, useEffect } from "react"
 import { Card, CardContent } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
-import { ChevronDown, Calendar, X, ChevronLeft, ChevronRight, AlertCircle, Info, Check } from "lucide-react"
+import { ChevronDown, X, ChevronLeft, ChevronRight, AlertCircle, Info, Check, Filter } from "lucide-react"
 import Image from "next/image"
 import toast, { Toaster } from "react-hot-toast"
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
@@ -18,8 +18,11 @@ import {
 } from "@/components/ui/dialog"
 import { isWithinInterval, format } from "date-fns"
 import { useMediaQuery } from "usehooks-ts"
+import { Label } from "@/components/ui/label"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 
-export function WithdrawalTab() {
+// Update the component to accept setActiveTab prop
+export function WithdrawalTab({ setActiveTab }) {
   const [walletAddress, setWalletAddress] = useState("")
   const [amount, setAmount] = useState("")
   const [network, setNetwork] = useState("")
@@ -27,7 +30,6 @@ export function WithdrawalTab() {
   const [statusFilter, setStatusFilter] = useState("all")
   // Add a new state for network filter
   const [networkFilter, setNetworkFilter] = useState("all")
-  const [networkModeFilter, setNetworkModeFilter] = useState("all")
   const [showDatePicker, setShowDatePicker] = useState(false)
   const [filteredTransactions, setFilteredTransactions] = useState([])
   const [addressError, setAddressError] = useState("")
@@ -35,6 +37,13 @@ export function WithdrawalTab() {
   const [balance, setBalance] = useState(1000.0) // Static USDT balance
   const [balanceUpdated, setBalanceUpdated] = useState(false)
   const isMobile = useMediaQuery("(max-width: 768px)")
+  const [showFilters, setShowFilters] = useState(false)
+  const [startDate, setStartDate] = useState("")
+  const [endDate, setEndDate] = useState("")
+  // Add a new state for the initial confirmation modal at the top of the component, after other state declarations
+  const [showInitialConfirmation, setShowInitialConfirmation] = useState(true)
+  // Then, add a new state to track if the form should be shown
+  const [showWithdrawalForm, setShowWithdrawalForm] = useState(false)
 
   // Pagination
   const [currentPage, setCurrentPage] = useState(1)
@@ -52,6 +61,9 @@ export function WithdrawalTab() {
     },
     SOL: {
       example: "7UX2i7SucgLMQcfZ75s3VXmZZY4YRUyJN9X1RgfMoDUi",
+    },
+    TRC20: {
+      example: "TJYdnfBxwmeFJ9nTQSRvMa9WpFjJR9Jp2Vr",
     },
   }
 
@@ -86,7 +98,6 @@ export function WithdrawalTab() {
       amount: "250.00",
       status: "Completed",
       network: "TON",
-      isTestnet: false,
     },
     {
       id: "tx2",
@@ -95,7 +106,6 @@ export function WithdrawalTab() {
       amount: "500.00",
       status: "Completed",
       network: "SOL",
-      isTestnet: false,
     },
     {
       id: "tx3",
@@ -104,7 +114,6 @@ export function WithdrawalTab() {
       amount: "175.50",
       status: "Completed",
       network: "TON",
-      isTestnet: true,
     },
     {
       id: "tx4",
@@ -113,7 +122,6 @@ export function WithdrawalTab() {
       amount: "320.75",
       status: "Pending",
       network: "SOL",
-      isTestnet: false,
     },
     {
       id: "tx5",
@@ -122,7 +130,6 @@ export function WithdrawalTab() {
       amount: "100.00",
       status: "Failed",
       network: "TON",
-      isTestnet: false,
     },
     {
       id: "tx6",
@@ -131,7 +138,6 @@ export function WithdrawalTab() {
       amount: "200.00",
       status: "Completed",
       network: "SOL",
-      isTestnet: true,
     },
     {
       id: "tx7",
@@ -140,7 +146,6 @@ export function WithdrawalTab() {
       amount: "150.25",
       status: "Completed",
       network: "TON",
-      isTestnet: false,
     },
     {
       id: "tx8",
@@ -149,7 +154,6 @@ export function WithdrawalTab() {
       amount: "300.50",
       status: "Completed",
       network: "SOL",
-      isTestnet: false,
     },
   ]
 
@@ -178,18 +182,9 @@ export function WithdrawalTab() {
       filtered = filtered.filter((transaction) => transaction.network === networkFilter)
     }
 
-    // Apply network mode filter
-    if (networkModeFilter !== "all") {
-      if (networkModeFilter === "mainnet") {
-        filtered = filtered.filter((transaction) => !transaction.isTestnet)
-      } else if (networkModeFilter === "testnet") {
-        filtered = filtered.filter((transaction) => transaction.isTestnet)
-      }
-    }
-
     setFilteredTransactions(filtered)
     setCurrentPage(1) // Reset to first page when filters change
-  }, [dateRange, statusFilter, networkFilter, networkModeFilter])
+  }, [dateRange, statusFilter, networkFilter])
 
   // Initialize filtered transactions on component mount
   useEffect(() => {
@@ -414,9 +409,48 @@ export function WithdrawalTab() {
     setDateRange({ from: null, to: null })
     setStatusFilter("all")
     setNetworkFilter("all")
-    setNetworkModeFilter("all")
+    setStartDate("")
+    setEndDate("")
   }
 
+  // Add or update the applyFilters function
+  const applyFilters = () => {
+    let filtered = [...transactions]
+
+    // Apply date filter
+    if (dateRange.from && dateRange.to) {
+      filtered = filtered.filter((transaction) => {
+        return isWithinInterval(transaction.dateObj, {
+          start: dateRange.from,
+          end: dateRange.to,
+        })
+      })
+    }
+
+    // Apply status filter
+    if (statusFilter !== "all") {
+      filtered = filtered.filter((transaction) => transaction.status === statusFilter)
+    }
+
+    // Apply network filter
+    if (networkFilter !== "all") {
+      filtered = filtered.filter((transaction) => transaction.network === networkFilter)
+    }
+
+    setFilteredTransactions(filtered)
+    setCurrentPage(1) // Reset to first page when filters change
+  }
+
+  // Add a function to handle redirection to settings tab
+  const redirectToSettings = () => {
+    // Directly navigate to settings tab without page refresh
+    if (setActiveTab) {
+      setActiveTab("settings")
+    }
+  }
+
+  // Modify the return statement to show the initial confirmation modal first
+  // Replace the beginning of the return statement (before the Toaster component) with:
   return (
     <div className="space-y-8 max-w-full overflow-visible">
       {/* Toast container */}
@@ -449,10 +483,35 @@ export function WithdrawalTab() {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Left Column - Withdrawal Form */}
         <div className="lg:col-span-2">
-          <Card className="bg-gradient-to-br from-purple-900/90 to-purple-950 border-purple-800/40 shadow-xl overflow-hidden animate-fade-in">
+          <Card className="bg-gradient-to-br from-purple-900/90 to-purple-950 border-purple-800/40 shadow-xl overflow-hidden animate-fade-in relative">
             <div className="bg-gradient-to-r from-purple-600/20 to-transparent p-4 border-b border-purple-800/30">
               <h2 className="text-lg font-semibold text-white">Request Withdrawal</h2>
             </div>
+
+            {!showWithdrawalForm ? (
+              // Initial confirmation overlay
+              <div className="absolute inset-0 bg-purple-950/90 backdrop-blur-sm flex flex-col items-center justify-center p-6 z-10">
+                <h3 className="text-xl font-bold text-white text-center mb-2">Confirm Action</h3>
+                <p className="text-purple-300 text-center mb-6">Do you want to proceed with the withdrawal request?</p>
+                <div className="flex justify-center gap-4">
+                  <Button
+                    type="button"
+                    className="bg-green-600 hover:bg-green-700 text-white font-medium px-8"
+                    onClick={() => setShowWithdrawalForm(true)}
+                  >
+                    TRUE
+                  </Button>
+                  <Button
+                    type="button"
+                    className="bg-red-600 hover:bg-red-700 text-white font-medium px-8"
+                    onClick={redirectToSettings}
+                  >
+                    FALSE
+                  </Button>
+                </div>
+              </div>
+            ) : null}
+
             <CardContent className="p-6 space-y-6">
               <div className="flex items-start gap-2 p-3 bg-purple-900/30 rounded-md border border-purple-700/30">
                 <AlertCircle className="h-5 w-5 text-purple-300 flex-shrink-0 mt-0.5" />
@@ -612,73 +671,112 @@ export function WithdrawalTab() {
       <div className="space-y-5">
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           <h2 className="text-xl font-bold text-white">Transaction History</h2>
-          {/* Filters */}
-          <div className="flex flex-col sm:flex-row gap-4">
-            {/* Replace the date range picker buttons with a simpler version */}
-            <div className="flex flex-col sm:flex-row gap-4">
-              <div className="relative">
-                <button className="w-full h-10 rounded-md border border-purple-700/30 bg-purple-950/70 px-3 py-2 text-sm text-purple-100 focus:outline-none focus-visible:ring-2 focus-visible:ring-purple-500 focus-visible:border-transparent flex items-center">
-                  <Calendar className="mr-2 h-4 w-4 text-purple-400" />
-                  <span>Select date range</span>
-                </button>
-              </div>
-
-              <div className="relative w-full sm:w-32">
-                <select
-                  className="w-full h-10 rounded-md border border-purple-700/30 bg-purple-950/70 px-3 py-2 text-sm text-purple-100 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent appearance-none"
-                  value={networkFilter}
-                  onChange={(e) => setNetworkFilter(e.target.value)}
-                >
-                  <option value="all">All Networks</option>
-                  <option value="TON">TON</option>
-                  <option value="SOL">SOL</option>
-                </select>
-                <ChevronDown className="absolute right-3 top-3 h-4 w-4 text-purple-400 pointer-events-none" />
-              </div>
-            </div>
-
-            <div className="relative w-full sm:w-32">
-              <select
-                className="w-full h-10 rounded-md border border-purple-700/30 bg-purple-950/70 px-3 py-2 text-sm text-purple-100 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent appearance-none"
-                value={networkModeFilter}
-                onChange={(e) => setNetworkModeFilter(e.target.value)}
-              >
-                <option value="all">All Modes</option>
-                <option value="mainnet">Mainnet</option>
-                <option value="testnet">Testnet</option>
-              </select>
-              <ChevronDown className="absolute right-3 top-3 h-4 w-4 text-purple-400 pointer-events-none" />
-            </div>
-
-            <div className="relative w-full sm:w-32">
-              <select
-                className="w-full h-10 rounded-md border border-purple-700/30 bg-purple-950/70 px-3 py-2 text-sm text-purple-100 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent appearance-none"
-                value={statusFilter}
-                onChange={(e) => setStatusFilter(e.target.value)}
-              >
-                <option value="all">All Statuses</option>
-                <option value="Completed">Completed</option>
-                <option value="Pending">Pending</option>
-                <option value="Failed">Failed</option>
-              </select>
-              <ChevronDown className="absolute right-3 top-3 h-4 w-4 text-purple-400 pointer-events-none" />
-            </div>
-          </div>
-          {(dateRange.from || statusFilter !== "all" || networkFilter !== "all" || networkModeFilter !== "all") && (
-            <div className="flex justify-end mt-2">
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={clearAllFilters}
-                className="h-8 border-purple-700/30 bg-purple-950/70 text-purple-300 hover:text-white hover:bg-purple-800/50"
-              >
-                <X className="mr-1 h-4 w-4" /> Clear all filters
-              </Button>
-            </div>
-          )}
+          <Button
+            variant="outline"
+            className={`border-purple-700/50 ${showFilters ? "bg-purple-700/50 text-white" : "bg-purple-800/20 text-purple-300"} hover:text-white hover:bg-purple-700/50`}
+            onClick={() => setShowFilters(!showFilters)}
+          >
+            <Filter className="mr-2 h-4 w-4" />
+            {showFilters ? "Hide Filters" : "Show Filters"}
+          </Button>
         </div>
 
-        {(dateRange.from || statusFilter !== "all" || networkFilter !== "all" || networkModeFilter !== "all") && (
+        {/* Filters Section - Styled like Payments and Statistics pages */}
+        {showFilters && (
+          <Card className="border-purple-800/40 bg-gradient-to-br from-purple-900/90 to-purple-950">
+            <CardContent className="p-4 sm:p-6">
+              <h3 className="text-sm font-medium text-purple-200 mb-4">Filters</h3>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                {/* Start Date */}
+                <div className="space-y-2">
+                  <Label htmlFor="start-date" className="text-purple-200">
+                    Start Date (DD-MM-YY)
+                  </Label>
+                  <Input
+                    id="start-date"
+                    placeholder="DD-MM-YY"
+                    value={startDate}
+                    onChange={(e) => setStartDate(e.target.value)}
+                    className="bg-purple-900/40 border-purple-700/30 text-purple-100 placeholder:text-purple-400 focus-visible:ring-purple-500"
+                  />
+                </div>
+
+                {/* End Date */}
+                <div className="space-y-2">
+                  <Label htmlFor="end-date" className="text-purple-200">
+                    End Date (DD-MM-YY)
+                  </Label>
+                  <Input
+                    id="end-date"
+                    placeholder="DD-MM-YY"
+                    value={endDate}
+                    onChange={(e) => setEndDate(e.target.value)}
+                    className="bg-purple-900/40 border-purple-700/30 text-purple-100 placeholder:text-purple-400 focus-visible:ring-purple-500"
+                  />
+                </div>
+
+                {/* Network Filter */}
+                <div className="space-y-2">
+                  <Label htmlFor="network-filter" className="text-purple-200">
+                    Network
+                  </Label>
+                  <Select value={networkFilter} onValueChange={setNetworkFilter}>
+                    <SelectTrigger
+                      id="network-filter"
+                      className="bg-purple-900/40 border-purple-700/30 text-purple-100 focus-visible:ring-purple-500"
+                    >
+                      <SelectValue placeholder="All Networks" />
+                    </SelectTrigger>
+                    <SelectContent className="bg-purple-900 border-purple-700/50 text-purple-100">
+                      <SelectItem value="all">All Networks</SelectItem>
+                      <SelectItem value="TON">TON</SelectItem>
+                      <SelectItem value="SOL">SOL</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                {/* Status Filter */}
+                <div className="space-y-2">
+                  <Label htmlFor="status-filter" className="text-purple-200">
+                    Status
+                  </Label>
+                  <Select value={statusFilter} onValueChange={setStatusFilter}>
+                    <SelectTrigger
+                      id="status-filter"
+                      className="bg-purple-900/40 border-purple-700/30 text-purple-100 focus-visible:ring-purple-500"
+                    >
+                      <SelectValue placeholder="All Statuses" />
+                    </SelectTrigger>
+                    <SelectContent className="bg-purple-900 border-purple-700/50 text-purple-100">
+                      <SelectItem value="all">All Statuses</SelectItem>
+                      <SelectItem value="Completed">Completed</SelectItem>
+                      <SelectItem value="Pending">Pending</SelectItem>
+                      <SelectItem value="Failed">Failed</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+
+              {/* Filter Buttons */}
+              <div className="flex justify-end mt-4 gap-2">
+                <Button
+                  variant="outline"
+                  className="border-purple-700/50 bg-purple-800/20 text-purple-300 hover:text-white hover:bg-purple-700/50"
+                  onClick={clearAllFilters}
+                >
+                  <X className="mr-1 h-4 w-4" /> Clear Filters
+                </Button>
+                <Button className="bg-purple-600 hover:bg-purple-700" onClick={applyFilters}>
+                  Apply Filters
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        )}
+
+        {/* Active Filters Display */}
+        {(dateRange.from || statusFilter !== "all" || networkFilter !== "all") && (
           <div className="p-3 bg-purple-900/30 rounded-md border border-purple-700/30 text-sm text-purple-300">
             <div className="flex flex-wrap gap-2 items-center">
               <span className="font-medium">Active filters:</span>
@@ -689,11 +787,6 @@ export function WithdrawalTab() {
               )}
               {networkFilter !== "all" && (
                 <span className="px-2 py-1 bg-purple-800/40 rounded-md text-xs">Network: {networkFilter}</span>
-              )}
-              {networkModeFilter !== "all" && (
-                <span className="px-2 py-1 bg-purple-800/40 rounded-md text-xs">
-                  Mode: {networkModeFilter === "testnet" ? "Testnet" : "Mainnet"}
-                </span>
               )}
               {statusFilter !== "all" && (
                 <span className="px-2 py-1 bg-purple-800/40 rounded-md text-xs">Status: {statusFilter}</span>
@@ -759,11 +852,6 @@ export function WithdrawalTab() {
                       <div className="text-sm font-medium text-purple-300">{transaction.date}</div>
                       <div className="text-center">
                         <span className="text-sm font-medium text-white">{transaction.network}</span>
-                        {transaction.isTestnet && (
-                          <span className="ml-2 text-xs px-1.5 py-0.5 bg-amber-500/20 text-amber-400 rounded-full">
-                            Testnet
-                          </span>
-                        )}
                       </div>
                       <div className="text-center font-bold text-white">{transaction.amount} USDT</div>
                       <div className="flex justify-end">

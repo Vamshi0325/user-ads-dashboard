@@ -23,6 +23,7 @@ export const AuthProvider = ({ children }) => {
   const [isLoading, setIsLoading] = useState(true)
   const [showLogin, setShowLogin] = useState(false)
   const [showSignup, setShowSignup] = useState(false)
+  const [signupEmail, setSignupEmail] = useState("")
 
   // Check if user is already logged in on mount
   useEffect(() => {
@@ -36,6 +37,9 @@ export const AuthProvider = ({ children }) => {
           // If we have both, consider the user authenticated
           setUser(JSON.parse(userData))
           setIsAuthenticated(true)
+          // Make sure modals are closed when user is authenticated
+          setShowLogin(false)
+          setShowSignup(false)
         }
       } catch (error) {
         console.error("Authentication check failed:", error)
@@ -74,6 +78,20 @@ export const AuthProvider = ({ children }) => {
     setShowSignup(true)
   }
 
+  // Handle successful signup
+  const handleSignupSuccess = (email) => {
+    setSignupEmail(email)
+    setShowSignup(false)
+    setShowLogin(true)
+  }
+
+  // Set login modal to show by default when authentication is needed
+  useEffect(() => {
+    if (!isLoading && !isAuthenticated) {
+      showLoginModal()
+    }
+  }, [isLoading, isAuthenticated])
+
   // Handle successful authentication (called from login/signup components)
   const handleAuthSuccess = (userData) => {
     setUser(userData)
@@ -98,6 +116,7 @@ export const AuthProvider = ({ children }) => {
       {children}
       {showLogin && (
         <LoginModal
+          initialEmail={signupEmail}
           onClose={() => {
             setShowLogin(false)
             // Check if we have a user after login attempt
@@ -120,6 +139,7 @@ export const AuthProvider = ({ children }) => {
             }
           }}
           onSwitchToLogin={showLoginModal}
+          onSignupSuccess={handleSignupSuccess}
         />
       )}
     </AuthContext.Provider>
